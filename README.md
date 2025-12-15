@@ -1,4 +1,4 @@
-# Connor Family Movies
+# Super-Eight Home Movie Optimisation
 
 Fast GPU subtitle pipeline and supporting smoke tests.
 
