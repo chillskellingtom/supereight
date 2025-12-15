@@ -13,6 +13,7 @@ services:
       - PYTHONUNBUFFERED=1
     devices:
       - /dev/dri:/dev/dri
+      - /dev/dxg:/dev/dxg
     volumes:
       - ./:/workspace
       - ./data:/data
@@ -34,6 +35,7 @@ services:
       - PYTHONUNBUFFERED=1
     devices:
       - /dev/dri:/dev/dri
+      - /dev/dxg:/dev/dxg
     volumes:
       - ./:/workspace
       - ./data:/data

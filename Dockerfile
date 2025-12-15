@@ -13,6 +13,9 @@ RUN --mount=type=cache,target=/var/cache/apt \
 COPY requirements.txt ./requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir -r requirements.txt
+# Attempt to install Intel XPU-enabled torch/IPEX (best-effort; falls back to CPU if unavailable)
+RUN --mount=type=cache,target=/root/.cache/pip \
+    (pip install --no-cache-dir torch==2.3.0a0+xpu intel-extension-for-pytorch==2.3.0 -f https://developer.intel.com/ipex-whl-stable-xpu || true)
 
 # Project code
 COPY . /workspace
