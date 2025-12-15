@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=intel/intel-optimized-pytorch:xpu-pytorch-2.3.0-jupyter
+ARG BASE_IMAGE=intel/intel-optimized-pytorch:latest
 FROM ${BASE_IMAGE}
 
 WORKDIR /workspace
@@ -17,6 +17,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Project code
 COPY . /workspace
 RUN chmod +x /workspace/scripts/docker_entrypoint.sh /workspace/scripts/run_pipeline.sh
+# Prefetch models to /models for offline runs
+RUN mkdir -p /models && PYTHONPATH=/workspace python /workspace/scripts/prefetch_models.py || true
 
 # Default env for Intel GPUs and logging
 ENV ZE_ENABLE_PCI_ID_DEVICE_ORDER=1 \

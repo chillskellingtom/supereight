@@ -1163,6 +1163,10 @@ def _run_face_tracking(scene_path: Path, frame_stride: int, min_score: float) ->
         if frame_idx % frame_stride != 0:
             frame_idx += 1
             continue
+        if frame is None or frame.size == 0:
+            LOG.warning("[faces_export] Skipping empty frame at %s idx=%d", scene_path.name, frame_idx)
+            frame_idx += 1
+            continue
 
         # Detect faces with SCRFD
         face_dets = _detect_faces_scrfd(detector_net, frame, min_score)

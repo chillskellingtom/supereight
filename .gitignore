@@ -57,6 +57,9 @@ checkpoints/
 archive/VRT/model_zoo/*.pth
 archive/VRT/model_zoo/**/*.pth
 data/
+inputs/
+processed/
+outputs/
 .env
 compose.override.yml
 /__pycache__/

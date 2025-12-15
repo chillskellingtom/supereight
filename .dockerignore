@@ -1,0 +1,11 @@
+.venv*
+__pycache__
+*.pyc
+.git
+archive
+logs
+inputs
+outputs
+processed
+data
+models

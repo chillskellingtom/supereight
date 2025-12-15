@@ -1,7 +1,8 @@
 psutil
 numpy
 opencv-python-headless
-pyscenedetect[opencv]
+scenedetect[opencv]
 openai-whisper
 pytest
 tqdm
+scikit-learn
