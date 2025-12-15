@@ -37,6 +37,7 @@ Environment variables (can be overridden via `docker compose run -e NAME=value .
 - `SUPEREIGHT_INPUT` (default `/data/inputs`)
 - `SUPEREIGHT_OUTPUT` (default `/data/processed`)
 - `SUPEREIGHT_SCENES_FOLDER` (default `/data/processed/scenes`)
+- `SUPEREIGHT_MODEL_CACHE` (default `/models`)
 - `ZE_AFFINITY_MASK` (pin a process to a specific Intel GPU if desired)
 - `ZE_ENABLE_PCI_ID_DEVICE_ORDER=1` (stable device ordering)
  - `WORKERS` (override worker count; default is one per XPU, or CPU cores-1 if no GPU)

@@ -40,7 +40,9 @@ except Exception as e:
 DEFAULT_SCENES_FOLDER = Path(
     os.environ.get("SUPEREIGHT_SCENES_FOLDER", "/data/processed/scenes")
 ).resolve()
-MODEL_CACHE = Path.home() / ".cache" / "connor_family_models"
+MODEL_CACHE = Path(
+    os.environ.get("SUPEREIGHT_MODEL_CACHE", "/models")
+).expanduser().resolve()
 MODEL_CACHE.mkdir(parents=True, exist_ok=True)
 VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv"}
 # SCRFD: Better accuracy than YuNet, optimized for Arc GPUs

@@ -23,6 +23,7 @@ ENV ZE_ENABLE_PCI_ID_DEVICE_ORDER=1 \
     PYTHONUNBUFFERED=1 \
     SUPEREIGHT_INPUT=/data/inputs \
     SUPEREIGHT_OUTPUT=/data/processed \
-    SUPEREIGHT_SCENES_FOLDER=/data/processed/scenes
+    SUPEREIGHT_SCENES_FOLDER=/data/processed/scenes \
+    SUPEREIGHT_MODEL_CACHE=/models
 
 ENTRYPOINT ["/workspace/scripts/docker_entrypoint.sh"]

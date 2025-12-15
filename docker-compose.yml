@@ -16,6 +16,7 @@ services:
     volumes:
       - ./:/workspace
       - ./data:/data
+      - ./models:/models
     entrypoint: ["/workspace/scripts/docker_entrypoint.sh"]
     command: ["/workspace/scripts/run_pipeline.sh"]
 
@@ -36,6 +37,7 @@ services:
     volumes:
       - ./:/workspace
       - ./data:/data
+      - ./models:/models
     entrypoint: ["/workspace/scripts/docker_entrypoint.sh"]
     command:
       [
