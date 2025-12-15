@@ -1,0 +1,65 @@
+--- worker_bootstrap.py	(original)
++++ worker_bootstrap.py	(fixed)
+@@ -34,7 +34,13 @@
+     if backend == "intel_arc":
+         # Set ZE_AFFINITY_MASK BEFORE any GPU imports
+-        # Format: 0.<device_index> pins to specific tile on first card
+-        affinity_mask = f"0.{device_index}"
++        # CRITICAL FIX: Pin to entire card, not tile on card 0
++        # Format: <card_index> pins to all tiles on that card
++        # - device_index=0 → ZE_AFFINITY_MASK=0 (all tiles on card 0)
++        # - device_index=1 → ZE_AFFINITY_MASK=1 (all tiles on card 1)
++        #
++        # WRONG (old): "0.{device_index}" → "0.0" and "0.1" (both on card 0!)
++        # RIGHT (new): "{device_index}" → "0" and "1" (separate cards)
++        affinity_mask = str(device_index)
+         os.environ["ZE_AFFINITY_MASK"] = affinity_mask
+
+         LOG.info(
+@@ -47,6 +53,25 @@
+         )
++
++        # VERIFICATION: Check that affinity was honored (after model loads)
++        # This will be called after model.to(device) in _load_model_for_device
++        os.environ["_VERIFY_GPU_AFFINITY"] = "1"  # Signal to verify later
++
+     elif backend == "cuda":
+         # For CUDA, use CUDA_VISIBLE_DEVICES
+         os.environ["CUDA_VISIBLE_DEVICES"] = str(device_index)
+@@ -134,5 +159,6 @@
+         os.getpid(),
+         len(scene_list),
+     )
++
++# End of worker_bootstrap.py
+
+
+--- process_parallel.py	(original)
++++ process_parallel.py	(fixed)
+@@ -556,6 +556,26 @@
+         model_name,
+     )
+
++    # VERIFICATION: Check GPU affinity was honored
++    if backend == "intel_arc" and os.environ.get("_VERIFY_GPU_AFFINITY") == "1":
++        try:
++            import torch
++            if hasattr(model, "parameters"):
++                actual_device = str(next(model.parameters()).device)
++                expected_device = f"xpu:{device_index}"
++
++                LOG.info(
++                    "[affinity-verify] PID=%d | Expected device: %s | Actual device: %s",
++                    pid,
++                    expected_device,
++                    actual_device,
++                )
++
++                if expected_device not in actual_device:
++                    LOG.error("⚠️  GPU affinity verification FAILED: model on %s, expected %s", actual_device, expected_device)
++        except Exception as e:
++            LOG.debug("GPU affinity verification failed: %s", e)
++
+     return model
+
+

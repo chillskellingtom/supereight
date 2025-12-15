@@ -1,0 +1,140 @@
+--- process_parallel.py	(original)
++++ process_parallel.py	(fixed)
+@@ -461,6 +461,82 @@
+
+
++def check_vram_available(device_index: int, required_gb: float, backend: str) -> Tuple[bool, float]:
++    """
++    Check if GPU has enough VRAM for model loading.
++
++    Returns:
++        (is_available, free_gb): Tuple of whether VRAM is sufficient and how much is free
++    """
++    if backend != "intel_arc":
++        return (True, 0.0)  # Only check for Intel Arc GPUs
++
++    try:
++        import intel_extension_for_pytorch as ipex
++        if not ipex.xpu.is_available():
++            LOG.warning("[vram-check] Intel XPU not available")
++            return (False, 0.0)
++
++        # Get memory statistics
++        mem_reserved = ipex.xpu.memory_reserved(device_index)
++        mem_allocated = ipex.xpu.memory_allocated(device_index)
++        mem_free = mem_reserved - mem_allocated
++        mem_free_gb = mem_free / (1024**3)
++
++        # Get total memory (if available)
++        try:
++            mem_total = ipex.xpu.get_device_properties(device_index).total_memory
++            mem_total_gb = mem_total / (1024**3)
++            mem_used_gb = (mem_total - mem_free) / (1024**3)
++        except Exception:
++            mem_total_gb = 16.0  # Assume 16GB for Arc A770
++            mem_used_gb = (mem_total_gb * 1024**3 - mem_free) / (1024**3)
++
++        is_available = mem_free_gb >= required_gb
++
++        LOG.info(
++            "[vram-check] GPU %d | Total: %.2f GB | Used: %.2f GB | Free: %.2f GB | Need: %.2f GB | OK: %s",
++            device_index,
++            mem_total_gb,
++            mem_used_gb,
++            mem_free_gb,
++            required_gb,
++            "✓" if is_available else "✗",
++        )
++
++        return (is_available, mem_free_gb)
++
++    except Exception as e:
++        LOG.warning("[vram-check] Failed to check VRAM on GPU %d: %s", device_index, e)
++        return (True, 0.0)  # Fail open (allow load, will fail later if truly OOM)
++
++
++def select_model_for_vram(free_vram_gb: float) -> Tuple[str, float]:
++    """
++    Select appropriate Whisper model size based on available VRAM.
++
++    Returns:
++        (model_name, estimated_vram_gb): Selected model and its estimated VRAM usage
++    """
++    # Whisper model VRAM estimates (empirical):
++    # - large: ~10GB
++    # - medium: ~5GB
++    # - small: ~2GB
++    # - base: ~1GB
++    # - tiny: ~0.5GB
++
++    if free_vram_gb >= 6.0:
++        return ("medium", 5.0)  # Default: medium for quality
++    elif free_vram_gb >= 3.0:
++        return ("small", 2.0)
++    elif free_vram_gb >= 1.5:
++        return ("base", 1.0)
++    else:
++        return ("tiny", 0.5)  # Last resort
++
++
+ def _load_model_for_device(device, backend: str):
+     """
+     Load a whisper model tuned for the target device.
+@@ -473,7 +549,6 @@
+     os.environ.pop("ZE_AFFINITY_MASK", None)
+-    model_name = "medium"
+     load_kwargs: Dict[str, Any] = {}
+     fallback_reason = None
+     post_move = None  # Optional post-load device move (e.g., DML)
+@@ -483,6 +558,20 @@
+     device_index = device.get("index", "N/A")
+     device_name = device.get("name", device.get("type", "unknown"))
+
++    # VRAM SAFETY CHECK: Select model size based on available VRAM
++    model_name = "medium"  # Default preference
++    if backend == "intel_arc":
++        vram_ok, free_vram_gb = check_vram_available(device_index, required_gb=5.0, backend=backend)
++        if not vram_ok:
++            # Auto-downgrade model size
++            model_name, estimated_vram = select_model_for_vram(free_vram_gb)
++            LOG.warning(
++                "[vram-safety] GPU %d low VRAM (%.2f GB free), downgrading to '%s' model (needs ~%.1f GB)",
++                device_index,
++                free_vram_gb,
++                model_name,
++                estimated_vram,
++            )
++
+     if backend == "intel_arc":
+         # Try Intel XPU backend first (requires IPEX/oneAPI), then DirectML.
+@@ -505,7 +594,6 @@
+                 final_device_desc = f"dml:{device['index']}"
+         except Exception as exc:
+             # Fall back to CPU but keep going.
+-            model_name = "small"
+             load_kwargs = {"device": "cpu"}
+             fallback_reason = f"intel_arc backend requested but GPU packages unavailable ({exc})"
+             final_device_desc = "cpu"
+@@ -513,7 +601,6 @@
+         load_kwargs = {"device": f"cuda:{device['index']}"}
+         final_device_desc = load_kwargs["device"]
+     else:
+-        model_name = "small"
+         load_kwargs = {"device": "cpu"}
+         final_device_desc = "cpu"
+
+@@ -524,6 +611,14 @@
+             fallback_reason or "unknown",
+         )
+
++    # Final VRAM check before loading (last chance to abort)
++    if backend == "intel_arc" and load_kwargs.get("device", "").startswith("xpu"):
++        # Reserve some headroom (1GB) for inference buffers
++        estimated_total = select_model_for_vram(999)[1] if model_name == "medium" else 2.0  # Rough estimate
++        vram_ok, _ = check_vram_available(device_index, required_gb=estimated_total + 1.0, backend=backend)
++        if not vram_ok:
++            raise RuntimeError(f"Insufficient VRAM on GPU {device_index} for {model_name} model (need ~{estimated_total+1:.1f}GB)")
++
+     # Load on the chosen device
+     model = whisper.load_model(model_name, **load_kwargs)
+

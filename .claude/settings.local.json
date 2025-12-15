@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pip install:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(powershell -File:*)",
+      "Bash(python process_parallel.py:*)",
+      "Bash(python -c:*)",
+      "Bash(powershell -Command \"Get-Location; python --version; python -c ''import whisper; print(whisper.__file__)''\")",
+      "Bash(powershell -Command \"Get-Command python | Select-Object -ExpandProperty Source\")",
+      "Bash(\"C:\\Users\\latch\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -m pytest tests/test_model_loading.py::test_model_loads_exactly_once_per_worker -v -s)",
+      "Bash(\"C:\\Users\\latch\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -m pytest:*)",
+      "Bash(\"C:\\Users\\latch\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" process_parallel.py --task subtitles --limit 2 -v)",
+      "Bash(\"C:\\Users\\latch\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -m pytest tests/test_progress_monitoring.py -v -s)",
+      "Bash(\"C:\\Users\\latch\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -m pytest tests -v --tb=short)",
+      "Bash(powershell -Command \"Measure-Command { & ''.\\scripts\\smoke_subtitles_tape1_1to20.ps1'' } | Select-Object -ExpandProperty TotalSeconds\")",
+      "Bash(Select-String -Pattern '\\[worker-start\\]|\\[model-load\\]|\\[progress\\]|=== Smoke|completed successfully|exit code')",
+      "Bash(powershell -Command \"python --version; pip list | Select-String -Pattern ''pytest|torch|whisper''\")",
+      "Bash(dir:*)",
+      "Bash(powershell -Command \"Get-ChildItem -Directory | Select-Object Name\")",
+      "Bash(powershell -Command:*)",
+      "Bash(conda run:*)",
+      "Bash(Select-String -Pattern \"\\[worker-start\\]|\\[affinity-verify\\]|ZE_AFFINITY_MASK|worker PID|GPU device\")",
+      "Bash(cat:*)",
+      "Bash(tee:*)",
+      "Bash(if [ -f /tmp/claude/tasks/b0365ce.output ])",
+      "Bash(then tail -100 /tmp/claude/tasks/b0365ce.output)",
+      "Bash(else echo \"Output file not found\")",
+      "Bash(fi)",
+      "Bash(conda env list:*)",
+      "Bash(.scriptssmoke_subtitles_tape1_1to20.ps1)",
+      "Bash(Select-String -Pattern \"ERROR|Failed:|transcribe_scene|TypeError\" -Context 0,2)",
+      "Bash(\"C:\\Users\\latch\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -m pytest tests/test_determinism.py::test_seed_logs_present -v -s)",
+      "Bash(\"C:\\Users\\latch\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -m pytest tests/test_gpu_failover.py::test_cleanup_handlers_registered -v -s)",
+      "Bash(\"C:\\Users\\latch\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -m pytest tests/test_dual_gpu_stress.py::test_lpt_scheduler_logs -v -s --timeout=600)",
+      "Bash(\"C:\\Users\\latch\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -m pytest tests/test_dual_gpu_stress.py::test_lpt_scheduler_logs -v -s)",
+      "Bash(\"C:\\Users\\latch\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" process_parallel.py --task subtitles --limit 10 -vv)"
+    ]
+  }
+}

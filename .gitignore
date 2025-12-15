@@ -1,0 +1,77 @@
+# Python cache and env artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.dylib
+*.egg-info/
+.eggs/
+.venv*/
+.venv/
+.env
+.env.*
+*.env
+pip-wheel-metadata/
+build/
+dist/
+htmlcov/
+.coverage*
+.pytest_cache/
+.mypy_cache/
+.cache/
+.ipynb_checkpoints/
+.ruff_cache/
+
+# Editors/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs and run artifacts
+logs/
+*.log
+*.tmp
+tmp/
+temp/
+
+# Video/audio/transcript artifacts
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.wav
+*.flac
+*.srt
+*.vtt
+*.ass
+
+# Model/cache downloads
+models/cache/
+models/downloads/
+checkpoints/
+*.bin
+archive/VRT/model_zoo/*.pth
+archive/VRT/model_zoo/**/*.pth
+
+# Node/Next.js (VideoLingo docs)
+node_modules/
+.next/
+out/
+.turbo/
+.vercel/
+VideoLingo/docs/.next/
+VideoLingo/docs/out/
+VideoLingo/docs/.turbo/
+VideoLingo/docs/.vercel/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Other generated assets
+coverage/
+site/
