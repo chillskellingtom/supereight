@@ -1,7 +1,8 @@
 # Full pipeline for processing family movies
-# Run this script to process all videos in C:\Users\latch\connor_family_movies
+# Automatically targets the local inputs folder next to the repo.
 
-$InputFolder = "C:\Users\latch\connor_family_movies"
+$RepoRoot = Split-Path $PSScriptRoot -Parent
+$InputFolder = Join-Path $RepoRoot "inputs"
 $OutputFolder = "C:\Users\latch\connor_family_movies_processed"
 $ScenesFolder = "$OutputFolder\scenes"
 $ScriptDir = $PSScriptRoot

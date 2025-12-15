@@ -14,7 +14,7 @@ import subprocess
 import sys
 
 
-DEFAULT_INPUT = Path(r"C:\Users\latch\connor_family_movies")
+DEFAULT_INPUT = Path(r"C:\Users\latch\connor_family_movies\inputs")
 DEFAULT_OUTPUT = Path(r"C:\Users\latch\connor_family_movies_processed")
 VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv"}
 LOG = logging.getLogger("detect_scenes")
