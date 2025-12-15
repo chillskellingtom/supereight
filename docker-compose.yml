@@ -20,6 +20,9 @@ services:
     command: ["/workspace/scripts/run_pipeline.sh"]
 
   supereight-jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: supereight:latest
     working_dir: /workspace
     environment:

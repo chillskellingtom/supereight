@@ -3166,6 +3166,7 @@ def configure_logging(verbosity: int, log_file: Optional[str] = None) -> None:
 
 
 if __name__ == "__main__":
+    multiprocessing.set_start_method("spawn", force=True)
     cli_args = parse_args()
     configure_logging(cli_args.verbose, log_file=getattr(cli_args, "log_file", None))
     sys.exit(main(cli_args))

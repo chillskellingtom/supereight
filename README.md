@@ -22,6 +22,12 @@ docker compose up supereight-jupyter
 ```
 Then open `http://localhost:8888` (token disabled inside the compose service; secure separately if needed).
 
+### Verify GPU inside the container
+```bash
+docker compose run --rm supereight python -m supereight.resources
+```
+Expected: shows `Intel XPU available=True` with device names; also prints JSON summary.
+
 ### Service layout
 - `supereight`: CLI runner (default command: `/workspace/scripts/run_pipeline.sh`).
 - `supereight-jupyter`: Jupyter Lab on port 8888.
@@ -33,6 +39,7 @@ Environment variables (can be overridden via `docker compose run -e NAME=value .
 - `SUPEREIGHT_SCENES_FOLDER` (default `/data/processed/scenes`)
 - `ZE_AFFINITY_MASK` (pin a process to a specific Intel GPU if desired)
 - `ZE_ENABLE_PCI_ID_DEVICE_ORDER=1` (stable device ordering)
+ - `WORKERS` (override worker count; default is one per XPU, or CPU cores-1 if no GPU)
 
 ### Resource reporting
 Every container start prints a resource snapshot (CPU, memory, disk, detected Intel XPUs, torch version). If XPUs are present, a small smoke tensor is executed on `xpu:0`.
@@ -44,3 +51,16 @@ Every container start prints a resource snapshot (CPU, memory, disk, detected In
 
 ## Legacy Windows entrypoints
 The original PowerShell wrappers remain in `scripts/` for native Windows runs, but Docker is the recommended path going forward.
+
+## Smoke test in Docker
+Minimal check (runs resource doctor to validate container wiring and XPU availability):
+```bash
+docker compose run --rm supereight \
+  /workspace/scripts/docker_entrypoint.sh \
+  python -m supereight.resources
+```
+
+## Windows via Docker Desktop + WSL2
+- Enable WSL2 integration in Docker Desktop.
+- Ensure Intel GPU passthrough is enabled (DX11/WSL2 GPU sharing) and `/dev/dri` is visible inside Linux containers; otherwise the stack will run on CPU fallback.
+- Place inputs under the repo path (e.g., `./data/inputs`) so they are volume-mounted into the container.
