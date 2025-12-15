@@ -15,19 +15,33 @@ $PythonParts = $PythonExe -split "\s+"
 function Invoke-Py {
     param([string[]]$Args)
     $baseArgs = if ($PythonParts.Length -gt 1) { $PythonParts[1..($PythonParts.Length - 1)] } else { @() }
+    $cmdPreview = @($PythonParts[0]) + $baseArgs + $Args
+    Write-Host "-> $($cmdPreview -join ' ')" -ForegroundColor DarkGray
     & $PythonParts[0] @baseArgs @Args
     return $LASTEXITCODE
 }
 
-Write-Host "=== Step 1: Scene Detection ===" -ForegroundColor Green
-Invoke-Py @($DetectScenesPy, "--input", $InputFolder, "--output", $OutputFolder, "-v")
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Scene detection failed!" -ForegroundColor Red
-    exit 1
+function Run-Step {
+    param(
+        [string]$Label,
+        [string[]]$Args
+    )
+    Write-Host "=== $Label ===" -ForegroundColor Green
+    $rc = Invoke-Py -Args $Args
+    Write-Host "Exit code: $rc" -ForegroundColor DarkGray
+    if ($rc -ne 0) {
+        throw "$Label failed (exit code $rc)"
+    }
 }
 
-Write-Host "`n=== Step 2: Face Export (with auto-cluster) ===" -ForegroundColor Green
-Invoke-Py @(
+Run-Step -Label "Step 1: Scene Detection" -Args @(
+    $DetectScenesPy,
+    "--input", $InputFolder,
+    "--output", $OutputFolder,
+    "-v"
+)
+
+Run-Step -Label "Step 2: Face Export (with auto-cluster)" -Args @(
     $ProcessParallelPy,
     "--task", "faces_export",
     "--scenes-folder", $ScenesFolder,
@@ -43,13 +57,8 @@ Invoke-Py @(
     "--cluster-n-passes", "3",
     "-v"
 )
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Face export/clustering failed!" -ForegroundColor Red
-    exit 1
-}
 
-Write-Host "`n=== Step 3: Video Enhancement ===" -ForegroundColor Green
-Invoke-Py @(
+Run-Step -Label "Step 3: Video Enhancement" -Args @(
     $ProcessParallelPy,
     "--task", "video_enhance",
     "--scenes-folder", $ScenesFolder,
@@ -59,13 +68,8 @@ Invoke-Py @(
     "--video-codec", "auto",
     "-v"
 )
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Video enhancement failed!" -ForegroundColor Red
-    exit 1
-}
 
-Write-Host "`n=== Step 4: Audio Enhancement ===" -ForegroundColor Green
-Invoke-Py @(
+Run-Step -Label "Step 4: Audio Enhancement" -Args @(
     $ProcessParallelPy,
     "--task", "audio_enhance",
     "--scenes-folder", $ScenesFolder,
@@ -73,22 +77,13 @@ Invoke-Py @(
     "--audio-bitrate", "192k",
     "-v"
 )
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Audio enhancement failed!" -ForegroundColor Red
-    exit 1
-}
 
-Write-Host "`n=== Step 5: Subtitles ===" -ForegroundColor Green
-Invoke-Py @(
+Run-Step -Label "Step 5: Subtitles" -Args @(
     $ProcessParallelPy,
     "--task", "subtitles",
     "--scenes-folder", $ScenesFolder,
     "-v"
 )
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Subtitle generation failed!" -ForegroundColor Red
-    exit 1
-}
 
 Write-Host "`n=== Pipeline Complete! ===" -ForegroundColor Green
 Write-Host "Results in: $OutputFolder" -ForegroundColor Cyan
