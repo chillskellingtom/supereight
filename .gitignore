@@ -56,6 +56,10 @@ checkpoints/
 *.bin
 archive/VRT/model_zoo/*.pth
 archive/VRT/model_zoo/**/*.pth
+data/
+.env
+compose.override.yml
+/__pycache__/
 
 # Node/Next.js (VideoLingo docs)
 node_modules/

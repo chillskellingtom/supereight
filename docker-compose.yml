@@ -1,0 +1,49 @@
+services:
+  supereight:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: supereight:latest
+    working_dir: /workspace
+    environment:
+      - SUPEREIGHT_INPUT=/data/inputs
+      - SUPEREIGHT_OUTPUT=/data/processed
+      - SUPEREIGHT_SCENES_FOLDER=/data/processed/scenes
+      - ZE_ENABLE_PCI_ID_DEVICE_ORDER=1
+      - PYTHONUNBUFFERED=1
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ./:/workspace
+      - ./data:/data
+    entrypoint: ["/workspace/scripts/docker_entrypoint.sh"]
+    command: ["/workspace/scripts/run_pipeline.sh"]
+
+  supereight-jupyter:
+    image: supereight:latest
+    working_dir: /workspace
+    environment:
+      - SUPEREIGHT_INPUT=/data/inputs
+      - SUPEREIGHT_OUTPUT=/data/processed
+      - SUPEREIGHT_SCENES_FOLDER=/data/processed/scenes
+      - ZE_ENABLE_PCI_ID_DEVICE_ORDER=1
+      - PYTHONUNBUFFERED=1
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ./:/workspace
+      - ./data:/data
+    entrypoint: ["/workspace/scripts/docker_entrypoint.sh"]
+    command:
+      [
+        "jupyter",
+        "lab",
+        "--notebook-dir=/workspace",
+        "--ip=0.0.0.0",
+        "--no-browser",
+        "--allow-root",
+        "--NotebookApp.token=",
+        "--NotebookApp.password=",
+      ]
+    ports:
+      - "8888:8888"

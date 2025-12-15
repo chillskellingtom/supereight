@@ -37,7 +37,9 @@ except Exception as e:
     _WMI_ERROR = str(e)  # Store error for debugging
 
 
-DEFAULT_SCENES_FOLDER = Path(r"C:\Users\latch\connor_family_movies_processed\scenes")
+DEFAULT_SCENES_FOLDER = Path(
+    os.environ.get("SUPEREIGHT_SCENES_FOLDER", "/data/processed/scenes")
+).resolve()
 MODEL_CACHE = Path.home() / ".cache" / "connor_family_models"
 MODEL_CACHE.mkdir(parents=True, exist_ok=True)
 VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv"}

@@ -1,0 +1,7 @@
+psutil
+numpy
+opencv-python-headless
+pyscenedetect[opencv]
+openai-whisper
+pytest
+tqdm
